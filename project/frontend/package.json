@@ -1,0 +1,40 @@
+{
+  "name": "user-management-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "serve": "vue-cli-service serve --host 0.0.0.0 --port 8080",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint",
+    "lint:fix": "vue-cli-service lint --fix"
+  },
+  "dependencies": {
+    "@element-plus/icons-vue": "^2.3.2",
+    "axios": "^1.6.5",
+    "core-js": "^3.35.0",
+    "dayjs": "^1.11.10",
+    "element-plus": "^2.5.1",
+    "js-md5": "^0.8.3",
+    "lodash-es": "^4.17.21",
+    "pinia": "^2.1.7",
+    "vue": "^3.4.13",
+    "vue-qrcode": "^2.2.2",
+    "vue-router": "^4.2.5"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.23.7",
+    "@babel/eslint-parser": "^7.23.3",
+    "@vue/cli-plugin-babel": "~5.0.8",
+    "@vue/cli-plugin-eslint": "~5.0.8",
+    "@vue/cli-service": "~5.0.8",
+    "eslint": "^8.56.0",
+    "eslint-plugin-vue": "^9.20.0",
+    "sass": "^1.70.0",
+    "sass-loader": "^13.3.3"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ]
+}
