@@ -1,6 +1,10 @@
+// D:\Vue\project\backend\src\routes\goods.js
 const express = require('express');
 const router = express.Router();
-const { authMiddleware } = require('../middleware/auth');
+
+// 【关键修正】：去掉花括号，直接引入中间件函数
+const authMiddleware = require('../middleware/auth');
+
 const {
   publishGoods,
   getGoodsList,

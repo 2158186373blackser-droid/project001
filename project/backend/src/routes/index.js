@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const messageRoutes = require('./message');
+router.use('/messages', messageRoutes); // 前端通过 /api/messages 访问，代理后这里匹配 /messages
 
 // 引入各业务路由
 const authRoutes = require('./auth');
