@@ -28,9 +28,24 @@ app.use(helmet({
   crossOriginEmbedderPolicy: false
 }));
 
-// CORS配置
+// CORS配置 - 支持动态从全局环境变量读取
+const allowedOrigins = [
+  process.env.CLIENT_URL,
+  'http://localhost:8080',
+  'http://127.0.0.1:8080',
+  'http://172.21.58.62:8080'
+].filter(Boolean);
+
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:8080',
+  origin: function (origin, callback) {
+    // 允许没有origin的请求（如移动端、服务器端、Insomnia/Postman等工具）
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV === 'development') {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   optionsSuccessStatus: 200,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -73,7 +88,7 @@ app.use('/api', routes);
 // 【终极修复】：在这里强制挂载外层的 goods 路由
 // ==========================================
 try {
-  const goodsRoutes = require('../routes/goods');
+  const goodsRoutes = require('./routes/goods');
   app.use('/api/goods', goodsRoutes);
   console.log('✅ 成功挂载商品路由: /api/goods');
 } catch (error) {

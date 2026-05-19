@@ -1,11 +1,15 @@
 <template>
   <div class="order-list">
-    <el-tabs v-model="activeTab" @tab-click="fetchOrders">
-      <el-tab-pane label="全部" name="all" />
-      <el-tab-pane label="待接单" name="pending" />
-      <el-tab-pane label="已接单" name="accepted" />
-      <el-tab-pane label="已完成" name="completed" />
-    </el-tabs>
+    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+      <el-tabs v-model="activeTab" @tab-click="fetchOrders">
+        <el-tab-pane label="全部" name="all" />
+        <el-tab-pane label="待接单" name="pending" />
+        <el-tab-pane label="已接单" name="accepted" />
+        <el-tab-pane label="已完成" name="completed" />
+      </el-tabs>
+      
+      <el-button type="primary" @click="router.push('/order/publish')" style="margin-top: 4px;">发布订单</el-button>
+    </div>
 
     <el-table :data="orders" v-loading="loading" empty-text="暂无订单">
       <el-table-column prop="orderNo" label="订单号" />
@@ -29,16 +33,16 @@ import { getOrderList } from '@/api/order'
 
 const router = useRouter()
 const loading = ref(false)
-const orders = ref([])         // 必须初始化为空数组
+const orders = ref([])         
 const activeTab = ref('all')
 
 const fetchOrders = async () => {
   loading.value = true
   try {
     const res = await getOrderList({ status: activeTab.value === 'all' ? '' : activeTab.value })
-    // 后端返回 { code: 200, data: { list: [...], total } }
-    if (res.code === 200 && res.data) {
-      orders.value = res.data.list || []   // 确保是数组
+    // 关键修复：因为 request.js 拦截器已经把 data 替换成了 list 数组，这里直接取 res.data
+    if (res.code === 200 && Array.isArray(res.data)) {
+      orders.value = res.data
     } else {
       orders.value = []
     }

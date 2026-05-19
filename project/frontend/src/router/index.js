@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useUserStore } from '@/store/userStore'
 
 const routes = [
   { path: '/', redirect: '/home' },
@@ -62,19 +63,22 @@ const routes = [
   },
 
   // 管理后台（独立布局）
-  {
-    path: '/admin',
-    component: () => import('@/components/admin/AdminLayout.vue'),
-    meta: { requiresAuth: true, requiresAdmin: true },
-    children: [
-      { path: 'dashboard', name: 'AdminDashboard', component: () => import('@/components/admin/Dashboard.vue'), meta: { title: '管理仪表盘' } },
-      { path: 'reports', name: 'AdminReports', component: () => import('@/components/admin/ReportList.vue'), meta: { title: '举报管理' } },
-      { path: 'report/:id', name: 'AdminReportDetail', component: () => import('@/components/admin/ReportDetail.vue'), meta: { title: '举报详情' } },
-      { path: 'users', name: 'AdminUsers', component: () => import('@/components/admin/UserList.vue'), meta: { title: '用户管理' } },
-      { path: 'logs', name: 'AdminLogs', component: () => import('@/components/admin/OperationLog.vue'), meta: { title: '操作日志' } },
-      { path: 'library/verify', name: 'AdminLibraryVerify', component: () => import('@/views/admin/AdminLibraryVerify.vue'), meta: { title: '图书馆核销' } },
-    ]
-  },
+  // src/router/index.js 找到这个位置修改
+{
+  path: '/admin',
+  component: () => import('@/components/admin/AdminLayout.vue'),
+  meta: { requiresAuth: true, requiresAdmin: true },
+  children: [
+    // ... 其他路由保持不变
+    { 
+      path: 'messages', 
+      name: 'MessageCenter', 
+      // 关键修改：将 component 的路径改为你在截图里看到的实际位置
+      component: () => import('@/views/common/MessageCenter.vue'), 
+      meta: { title: '消息通知' } 
+    },
+  ]
+},
 
   {
     path: '/:pathMatch(.*)*',
@@ -91,6 +95,14 @@ const router = createRouter({
 
 // 全局路由守卫
 router.beforeEach((to, from, next) => {
+  // 核心修复点：如果检测到误把 logout 作为参数传入了订单详情页，强行在前端拦截并执行登出
+  if (to.path.includes('logout') || to.params.id === 'logout' || to.path === '/do-not-route') {
+    const userStore = useUserStore()
+    userStore.clearToken()
+    next('/login')
+    return
+  }
+
   document.title = to.meta.title ? `${to.meta.title} - 景艺大服务平台` : '景艺大服务平台'
 
   const token = localStorage.getItem('token')

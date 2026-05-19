@@ -2,9 +2,12 @@ const express = require('express');
 const router = express.Router();
 const { authMiddleware } = require('../../middleware/auth');
 const { isAdmin } = require('../../middleware/adminCheck');
-const { getUsers, toggleBan } = require('../../controllers/admin/userController');
+const { getUsers, toggleBan, resetAbsence } = require('../../controllers/admin/userController');
 
 router.get('/', authMiddleware, isAdmin, getUsers);
-router.put('/:id/ban', authMiddleware, isAdmin, toggleBan);  // 或使用 POST
+router.post('/:id/ban', authMiddleware, isAdmin, toggleBan);
+// 添加 unban 路由，让它指向同一个 toggleBan 控制器
+router.post('/:id/unban', authMiddleware, isAdmin, toggleBan); 
+router.post('/:id/reset-absence', authMiddleware, isAdmin, resetAbsence);
 
 module.exports = router;

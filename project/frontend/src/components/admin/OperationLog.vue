@@ -1,87 +1,65 @@
 <template>
   <el-card>
-    <template #header>操作日志</template>
-    <el-table :data="logs" v-loading="loading">
+    <template #header>操作日志记录</template>
+    
+    <div v-if="logs.length === 0" style="padding: 20px; color: #999;">
+      暂无数据...
+    </div>
+
+    <el-table :data="logs" v-loading="loading" style="width: 100%" v-else>
       <el-table-column prop="id" label="ID" width="60" />
-      <el-table-column prop="adminUsername" label="操作管理员" width="120" />
-      <el-table-column prop="operationType" label="操作类型" width="140">
-        <template #default="{ row }">{{ getOperationTypeText(row.operationType) }}</template>
-      </el-table-column>
-      <el-table-column prop="targetType" label="目标类型" width="100" />
-      <el-table-column prop="targetId" label="目标ID" width="80" />
-      <el-table-column prop="ipAddress" label="IP地址" width="140" />
-      <el-table-column prop="createdAt" label="操作时间" width="180">
-        <template #default="{ row }">{{ formatTime(row.createdAt) }}</template>
-      </el-table-column>
-      <el-table-column label="详情" width="80">
+      
+      <el-table-column label="操作员" width="120">
         <template #default="{ row }">
-          <el-button link type="primary" @click="showDetail(row)">查看</el-button>
+          {{ row.admin ? row.admin.username : (row.adminUsername || '系统') }}
+        </template>
+      </el-table-column>
+
+      <el-table-column prop="operationType" label="操作" width="150" />
+      <el-table-column prop="targetType" label="目标类型" width="120" />
+      <el-table-column prop="ipAddress" label="IP" width="140" />
+      <el-table-column prop="createdAt" label="时间" width="180" />
+      
+      <el-table-column label="详情">
+        <template #default="{ row }">
+          <el-popover placement="left" width="400" trigger="click">
+            <template #reference><el-button size="small">查看</el-button></template>
+            <div>
+              <p><strong>修改前:</strong> {{ row.beforeSnapshot }}</p>
+              <p><strong>修改后:</strong> {{ row.afterSnapshot }}</p>
+            </div>
+          </el-popover>
         </template>
       </el-table-column>
     </el-table>
-    <el-pagination
-      v-model:current-page="page"
-      :page-size="pageSize"
-      :total="total"
-      layout="prev, pager, next"
-      @current-change="fetchLogs"
-    />
-
-    <el-dialog v-model="dialogVisible" title="操作详情" width="600px">
-      <pre>{{ detailContent }}</pre>
-    </el-dialog>
   </el-card>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { getOperationLogs } from '@/api/admin/dashboard'   // 假设接口统一放在这里，如有单独文件可自行调整
-import dayjs from 'dayjs'
-import { useUserStore } from '@/store/userStore'
+import { ref, onMounted } from 'vue';
+import { getAdminLogs } from '@/api/admin/log';
 
-const userStore = useUserStore()
-const isAdmin = userStore.userInfo?.username === 'admin'
-
-const loading = ref(false)
-const logs = ref([])
-const page = ref(1)
-const pageSize = ref(20)
-const total = ref(0)
-const dialogVisible = ref(false)
-const detailContent = ref('')
-
-const getOperationTypeText = (type) => {
-  const map = {
-    delete_post: '删除帖子',
-    delete_comment: '删除评论',
-    ban_user: '封禁用户',
-    unban_user: '解封用户',
-    handle_report: '处理举报',
-    shelve_goods: '下架商品'
-  }
-  return map[type] || type
-}
-
-const formatTime = (t) => dayjs(t).format('YYYY-MM-DD HH:mm:ss')
+const loading = ref(false);
+const logs = ref([]);
 
 const fetchLogs = async () => {
-  if (!isAdmin) return   // 普通用户不发送请求
-  loading.value = true
+  loading.value = true;
   try {
-    const res = await getOperationLogs({ page: page.value, pageSize: pageSize.value })
-    logs.value = res.data.list
-    total.value = res.data.total
-  } finally { loading.value = false }
-}
+    const res = await getAdminLogs({ page: 1, pageSize: 20 });
+    
+    // 直接赋值逻辑
+    if (res && Array.isArray(res.data)) {
+      logs.value = res.data;
+    } else {
+      console.warn('API 返回的数据为空或格式异常:', res);
+      logs.value = [];
+    }
+  } catch (error) {
+    console.error('日志获取出错:', error);
+  } finally {
+    loading.value = false;
+  }
+};
 
-const showDetail = (row) => {
-  detailContent.value = JSON.stringify(
-    { before: row.beforeSnapshot, after: row.afterSnapshot },
-    null,
-    2
-  )
-  dialogVisible.value = true
-}
-
-onMounted(fetchLogs)
+onMounted(fetchLogs);
 </script>

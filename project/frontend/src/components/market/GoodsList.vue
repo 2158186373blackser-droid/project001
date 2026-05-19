@@ -1,15 +1,16 @@
 <template>
   <div class="goods-list">
-    <!-- 搜索框 -->
-    <el-input
-      v-model="keyword"
-      placeholder="搜索商品"
-      clearable
-      @input="fetchGoods"
-      style="margin-bottom: 16px;"
-    />
+    <div style="margin-bottom: 16px; display: flex; gap: 16px;">
+      <el-input
+        v-model="keyword"
+        placeholder="搜索商品"
+        clearable
+        @input="fetchGoods"
+        style="width: 300px;"
+      />
+      <el-button type="primary" @click="router.push('/market/publish')">发布商品</el-button>
+    </div>
 
-    <!-- 表格，仅在 goods 是数组且长度大于0时显示内容，否则显示空状态提示 -->
     <el-table
       v-if="Array.isArray(goods) && goods.length > 0"
       :data="goods"
@@ -29,7 +30,6 @@
       </el-table-column>
     </el-table>
 
-    <!-- 当没有数据且不在加载中时，显示无数据提示 -->
     <el-empty v-if="!loading && goods.length === 0" description="暂无商品" />
   </div>
 </template>

@@ -1,5 +1,9 @@
 <template>
   <div class="post-list">
+    <div style="margin-bottom: 16px;">
+      <el-button type="primary" @click="router.push('/forum/publish')">发布帖子</el-button>
+    </div>
+
     <el-table :data="posts" v-loading="loading" empty-text="暂无帖子">
       <el-table-column prop="title" label="标题" />
       <el-table-column prop="author.username" label="作者" />
@@ -20,14 +24,15 @@ import { getPostList } from '@/api/post'
 
 const router = useRouter()
 const loading = ref(false)
-const posts = ref([])         // 初始化为空数组
+const posts = ref([])         
 
 const fetchPosts = async () => {
   loading.value = true
   try {
     const res = await getPostList()
-    if (res.code === 200 && res.data) {
-      posts.value = res.data.list || []
+    // 关键修复：直接取被拦截器处理后的数组 res.data
+    if (res.code === 200 && Array.isArray(res.data)) {
+      posts.value = res.data
     } else {
       posts.value = []
     }
