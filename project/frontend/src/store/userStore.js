@@ -134,11 +134,12 @@ export const useUserStore = defineStore('user', () => {
       return false
     }
   }
+  
   // 确保 userInfo 正确从 localStorage 获取，且 admin 角色判断一致
-const isAdmin = computed(() => {
-  const user = JSON.parse(localStorage.getItem('userInfo') || '{}');
-  return user.username === 'admin';
-});
+  const isAdmin = computed(() => {
+    const user = JSON.parse(localStorage.getItem('userInfo') || '{}');
+    return user.username === 'admin';
+  });
 
   // ==================== 导出 ====================
   return {
@@ -146,6 +147,7 @@ const isAdmin = computed(() => {
     userInfo,
     balance,
     isLoggedIn,
+    isAdmin, // 修复：在这里导出 isAdmin，解决 eslint 报错
     setToken,
     clearToken,
     setBalance,

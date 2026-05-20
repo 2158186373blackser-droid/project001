@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { authMiddleware } = require('../middleware/auth');
+const authMiddleware = require('../middleware/auth'); // 修正：取消解构
 const {
   createPost,
   getPostList,
